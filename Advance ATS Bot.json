@@ -1,0 +1,1116 @@
+{
+  "name": "Advance ATS Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -256,
+        -32
+      ],
+      "id": "99eefa43-ec44-4183-a7cd-b8679465dda4",
+      "name": "Telegram Trigger",
+      "webhookId": "8e5aacdb-18d1-4a69-8ddf-44276ad5797b",
+      "credentials": {
+        "telegramApi": {
+          "id": "bPNa0mEpkG91DBQp",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### we need switch between 3 notes ",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "dc9ee756-2fb6-434b-be42-3ca8aa3ff813",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "46b7aaf2-8dff-4a8b-9178-b5fee17520af",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "Hi",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b588086f-f7d4-4fea-a1b4-4eb74374d51f",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "Hello",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "f5663a41-515e-4b9e-a03b-a5f3caaa228d",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "Hey",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        -32
+      ],
+      "id": "60e7920e-1edd-4af3-8f84-fb86f850ef29",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Hi ,{{ $('Telegram Trigger').item.json.message.chat.first_name }}\n\nyou can upload a zip file or a single PDF so  that I can process it and give you the ATS score",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        -160
+      ],
+      "id": "b599ac9a-2423-447b-abbb-fa36582582f3",
+      "name": "Send a text message",
+      "webhookId": "83669f99-da4c-4e94-a8c7-2f88a426318d",
+      "credentials": {
+        "telegramApi": {
+          "id": "bPNa0mEpkG91DBQp",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.document.file_name }}",
+                    "rightValue": ".pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    },
+                    "id": "944f7dcc-2f82-4602-bd5b-2cc95767d772"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pdf file"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "77632709-6621-4805-bb61-14236ac66723",
+                    "leftValue": "={{ $json.message.document.file_name }}",
+                    "rightValue": ".zip",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "zip file"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        160,
+        64
+      ],
+      "id": "36416c52-e794-40e8-8590-aad67ba8a7e4",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        -80
+      ],
+      "id": "cd531850-3692-47bf-9927-1ca770a26d7b",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\nEvaluate my resume using ATS standards.\nReturn the result in plain text only using the required format.\n\nyour output must be in this strict json format:\n{\n   \"Name\":\"\",\n   \"Email\":\"\",\n   \"Mobile No\"=0,\n   \"ATS_Score\"=0\n}\n\nResume text:{{ $json.text }}\n",
+        "options": {
+          "systemMessage": "=You are ResumeScan AI — an ATS-powered resume evaluation expert trained on global hiring standards.\nYour role is to analyze resumes with recruiter-level accuracy and ATS precision.\nFor every resume the user submits, you must:\n\nExtract key skills, experience, and formatting patterns\n\nCompare them with ATS expectations and job-role standards\n\nProvide an ATS Score (1–100)\n\nHighlight strengths and weaknesses\n\nIdentify missing keywords and structural issues\n\nSuggest clear, actionable improvements to maximize ATS compatibility and hiring chances\n\nBe professional, concise, and objective.\nDo not change any resume details unless asked.\nFocus on clarity, relevance, and ATS alignment in every response.\n\nYou are an ATS evaluator. Your job is to analyze the resume text and return a single numeric ATS score out of 100, with no explanation or additional content. Make sure the response is within Telegram’s 4096-character limit.\n\noutput will be like: resume score:\nthing to what improve of note, with resume name. so give in clear mannar in points and in between give some space for clearances \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        544,
+        -80
+      ],
+      "id": "5f05e707-4071-451c-a4b5-21a17dec14ef",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        544,
+        144
+      ],
+      "id": "f0585d10-2296-4ccb-9e8b-0aef49153ee6",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1nyQrbVIf3uLehsq",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "return [{\"output\":_items[0][\"json\"][\"output\"].strip(\"```json\\n\")}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -80
+      ],
+      "id": "8c2ec9e7-3ea8-4439-a85c-070855c4545e",
+      "name": "Code in Python (Native) (Beta)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fb9bb42c-aa03-479f-b9ca-aef932be9039",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        -80
+      ],
+      "id": "36dad3b1-1385-411c-854f-2138c86fb1d2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9b34af95-d521-4f06-9e51-43d95cdeb829",
+              "leftValue": "={{ $json.output.ATS_Score }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        -80
+      ],
+      "id": "dcd1834a-2df9-40a7-af45-7acdb5cecea3",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q",
+          "mode": "list",
+          "cachedResultName": "Resume shotlist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Accepted ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Edit Fields').item.json.output.Name }}",
+            "Email": "={{ $('Edit Fields').item.json.output.Email }}",
+            "Mobile No": "={{ $('Edit Fields').item.json.output['Mobile No'] }}",
+            "ATS_Score": "={{ $('Edit Fields').item.json.output.ATS_Score }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mobile No",
+              "displayName": "Mobile No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ATS_Score",
+              "displayName": "ATS_Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1504,
+        -208
+      ],
+      "id": "fcc171ab-ad4b-4cd2-b1dd-b21581150a25",
+      "name": "Accepted resume",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "arTkRbAG9V6V4XoO",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q",
+          "mode": "list",
+          "cachedResultName": "Resume shotlist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 932523687,
+          "mode": "list",
+          "cachedResultName": "rejected",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q/edit#gid=932523687"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Edit Fields').item.json.output.Name }}",
+            "Email": "={{ $('Edit Fields').item.json.output.Email }}",
+            "Mobile No": "={{ $('Edit Fields').item.json.output['Mobile No'] }}",
+            "ATS_Score": "={{ $('Edit Fields').item.json.output.ATS_Score }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mobile No",
+              "displayName": "Mobile No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ATS_Score",
+              "displayName": "ATS_Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1504,
+        0
+      ],
+      "id": "ecf0c10d-ea78-4f61-b487-8061b2b829c0",
+      "name": "rejected resume",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "arTkRbAG9V6V4XoO",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "outputPrefix": "data_"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        336
+      ],
+      "id": "c1d3ab97-d341-4a21-8969-53f0f5a9a8c3",
+      "name": "Compression"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        560,
+        336
+      ],
+      "id": "403516bc-ad54-4006-9414-cd42fd536588",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        768,
+        336
+      ],
+      "id": "37baf139-1bd8-46d2-9f08-13bcd9fa0ae2",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "={{ $binary.keys()[0]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        480
+      ],
+      "id": "b55e7fca-37fb-4a8c-a164-5f0303636c6d",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\nEvaluate my resume using ATS standards.\nReturn the result in plain text only using the required format.\n\nyour output must be in this strict json format:\n{\n   \"Name\":\"\",\n   \"Email\":\"\",\n   \"Mobile No\"=0,\n   \"ATS_Score\"=0\n}\n\nResume text:{{ $json.text }}\n",
+        "options": {
+          "systemMessage": "=You are ResumeScan AI — an ATS-powered resume evaluation expert trained on global hiring standards.\nYour role is to analyze resumes with recruiter-level accuracy and ATS precision.\nFor every resume the user submits, you must:\n\nExtract key skills, experience, and formatting patterns\n\nCompare them with ATS expectations and job-role standards\n\nProvide an ATS Score (1–100)\n\nHighlight strengths and weaknesses\n\nIdentify missing keywords and structural issues\n\nSuggest clear, actionable improvements to maximize ATS compatibility and hiring chances\n\nBe professional, concise, and objective.\nDo not change any resume details unless asked.\nFocus on clarity, relevance, and ATS alignment in every response.\n\nYou are an ATS evaluator. Your job is to analyze the resume text and return a single numeric ATS score out of 100, with no explanation or additional content. Make sure the response is within Telegram’s 4096-character limit.\n\noutput will be like: resume score:\nthing to what improve of note, with resume name. so give in clear mannar in points and in between give some space for clearances \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1200,
+        480
+      ],
+      "id": "438ac86b-2440-4cfd-80ee-84a47c748ba2",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        704
+      ],
+      "id": "8c3ce0ec-9819-4639-bba5-9ba90f2bf0ce",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1nyQrbVIf3uLehsq",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "return [{\"output\":_items[0][\"json\"][\"output\"].strip(\"```json\\n\")}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        480
+      ],
+      "id": "199d1239-56d4-41cf-ba46-2ad256c7b33f",
+      "name": "Code in Python (Native) (Beta)1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fb9bb42c-aa03-479f-b9ca-aef932be9039",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        480
+      ],
+      "id": "ec4cc6b8-7062-430a-a778-703abcfa3724",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9b34af95-d521-4f06-9e51-43d95cdeb829",
+              "leftValue": "={{ $json.output.ATS_Score }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1936,
+        480
+      ],
+      "id": "b1764c1e-dfdb-40a0-8699-379f2a3b6afb",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q",
+          "mode": "list",
+          "cachedResultName": "Resume shotlist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Accepted ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Edit Fields1').item.json.output.Name }}",
+            "Email": "={{ $('Edit Fields1').item.json.output.Email }}",
+            "Mobile No": "={{ $('Edit Fields1').item.json.output['Mobile No'] }}",
+            "ATS_Score": "={{ $('Edit Fields1').item.json.output.ATS_Score }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mobile No",
+              "displayName": "Mobile No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ATS_Score",
+              "displayName": "ATS_Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2160,
+        352
+      ],
+      "id": "da6433cc-b79b-4768-ba64-863efb638d41",
+      "name": "Accepted resume1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "arTkRbAG9V6V4XoO",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q",
+          "mode": "list",
+          "cachedResultName": "Resume shotlist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 932523687,
+          "mode": "list",
+          "cachedResultName": "rejected",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HBNQ8D8JcwT3xLQR6InUMOeXGxGqMN602Bc1ccNCZ6Q/edit#gid=932523687"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Edit Fields1').item.json.output.Name }}",
+            "Email": "={{ $('Edit Fields1').item.json.output.Email }}",
+            "Mobile No": "={{ $('Edit Fields1').item.json.output['Mobile No'] }}",
+            "ATS_Score": "={{ $('Edit Fields1').item.json.output.ATS_Score }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mobile No",
+              "displayName": "Mobile No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ATS_Score",
+              "displayName": "ATS_Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2160,
+        560
+      ],
+      "id": "4a73f7cf-c7af-4d2c-bca5-0ca78aef1a6e",
+      "name": "rejected resume1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "arTkRbAG9V6V4XoO",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2432,
+        448
+      ],
+      "id": "55dc3245-6ada-4703-a0f0-3b345d8119b3",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2416,
+        752
+      ],
+      "id": "30c23abf-ceef-4dc3-a55a-ddf3817f8c2a",
+      "name": "Wait",
+      "webhookId": "e6090538-8f92-455f-ba0e-3cb617819a18"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Native) (Beta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Native) (Beta)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Accepted resume",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "rejected resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Native) (Beta)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Native) (Beta)1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Accepted resume1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "rejected resume1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accepted resume1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "rejected resume1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f6b37be5-b886-4a4a-8887-fc905a9ec28e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "be245299844d6ad8b8b64b95a71162224bc0e0687e66c2b0b5e9e053cb764cb9"
+  },
+  "id": "RURRsOovvFDOxVme",
+  "tags": []
+}
