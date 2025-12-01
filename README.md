@@ -37,6 +37,11 @@
      ├─ PDF: Extract -> AI Agent -> Clean JSON -> IF (Score>70) -> Google Sheets
      └─ ZIP: Unzip -> Loop -> Extract -> AI Agent -> Clean JSON -> IF -> Google Sheets
 </code></pre>
+
+   
+<img width="1919" height="909" alt="Screenshot 2025-12-01 163408" src="https://github.com/user-attachments/assets/b1b11dd8-c420-4015-9e16-34b78efe09c0" />
+
+   
  <div>
         <h2>Quick usage</h2>
         <ol>
