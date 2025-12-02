@@ -20,7 +20,7 @@
     <div class="grid">
       <section class="card">
         <h2>Quick overview</h2>
-        <p>This project automates early-stage hiring by evaluating resumes with an LLM-driven ATS evaluator. Candidates upload a single PDF or a ZIP of resumes via Telegram; n8n handles file extraction, agentic prompt construction, and Google Gemini evaluation. Results (Name, Email, Mobile, ATS_Score) are written to Google Sheets and candidates are auto-classified (Accepted if score &gt; 70).</p>
+        <p>This project automates early-stage hiring by evaluating resumes with an LLM-driven ATS evaluator. Candidates upload a single PDF or a ZIP of resumes via Telegram; n8n handles file extraction, agentic prompt construction, and Google Gemini evaluation. Results (Name, Email, Mobile, ATS_Score) are written to Google Sheets and candidates are auto-classified (Accepted if score &gt; 70), and also check ATS score of you resume</p>
  <div>
         <h2>Features</h2>
         <ul>
@@ -38,10 +38,24 @@
      └─ ZIP: Unzip -> Loop -> Extract -> AI Agent -> Clean JSON -> IF -> Google Sheets
 </code></pre>
 
-   
-<img width="1919" height="909" alt="Screenshot 2025-12-01 163408" src="https://github.com/user-attachments/assets/b1b11dd8-c420-4015-9e16-34b78efe09c0" />
+  <h2>ATS Resume Screening Bot</h2> 
 
+
+https://github.com/user-attachments/assets/50545100-41c5-4822-928b-b139f3be3b7e
+
+
+
+
+
+   <h2>ATS Resume ATS Score Checker Bot</h2> 
    
+
+
+
+https://github.com/user-attachments/assets/5f3db74a-e81e-401c-b440-c0df15cdcb0d
+
+
+
  <div>
         <h2>Quick usage</h2>
         <ol>
