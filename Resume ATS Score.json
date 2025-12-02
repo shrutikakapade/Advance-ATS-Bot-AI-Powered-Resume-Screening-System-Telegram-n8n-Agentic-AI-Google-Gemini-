@@ -1,0 +1,273 @@
+{
+  "name": "Resume ATS Score",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e19ac299-6369-48e7-bee8-94f92bf491b3",
+      "name": "Telegram Trigger",
+      "webhookId": "8e5aacdb-18d1-4a69-8ddf-44276ad5797b",
+      "credentials": {
+        "telegramApi": {
+          "id": "bPNa0mEpkG91DBQp",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "outputPrefix": "data_"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "2a9a9ce2-9b28-4167-9c43-862bb36fb2d2",
+      "name": "Compression"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "e18debc7-d230-4a6b-a073-752ced8bbed7",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        608,
+        0
+      ],
+      "id": "f8920af8-1970-4929-8159-66342b422451",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "={{ $binary.keys()[0]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        160
+      ],
+      "id": "51cc2cd1-3077-4fb5-9fcd-3e995b5fdf04",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\nEvaluate my resume using ATS standards.\nReturn the result in plain text only using the required format.\n\nResume text:{{ $json.text }}\n",
+        "options": {
+          "systemMessage": "=You are ResumeScan AI — an ATS-powered resume evaluation expert trained on global hiring standards.\nYour role is to analyze resumes with recruiter-level accuracy and ATS precision.\nFor every resume the user submits, you must:\n\nExtract key skills, experience, and formatting patterns\n\nCompare them with ATS expectations and job-role standards\n\nProvide an ATS Score (1–100)\n\nHighlight strengths and weaknesses\n\nIdentify missing keywords and structural issues\n\nSuggest clear, actionable improvements to maximize ATS compatibility and hiring chances\n\nBe professional, concise, and objective.\nDo not change any resume details unless asked.\nFocus on clarity, relevance, and ATS alignment in every response.\n\nYou are an ATS evaluator. Your job is to analyze the resume text and return a single numeric ATS score out of 100, with no explanation or additional content. Make sure the response is within Telegram’s 4096-character limit.\n\noutput will be like: resume score:\nthing to what improve of note, with resume name. so give in clear mannar in points and in between give some space for clearances \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        160
+      ],
+      "id": "dccdea16-43e6-4c80-8b30-48253ddab291",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        368
+      ],
+      "id": "0af617d0-30ce-4e48-8def-a227150dfdc1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1nyQrbVIf3uLehsq",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        160
+      ],
+      "id": "63c3babb-2de4-4979-a50a-f6c78c62c6b8",
+      "name": "Send a text message",
+      "webhookId": "83fb938b-fc2f-4924-8e0c-c7debdd100d3",
+      "credentials": {
+        "telegramApi": {
+          "id": "bPNa0mEpkG91DBQp",
+          "name": "Telegram account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1376,
+        416
+      ],
+      "id": "7f92a887-f6b7-43ed-85c7-2395bea9065c",
+      "name": "Wait",
+      "webhookId": "01f12b04-e0d5-4642-8021-e602d6508ef3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f2153fcb-d3f8-42b6-bff7-3c33cb0116be",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "be245299844d6ad8b8b64b95a71162224bc0e0687e66c2b0b5e9e053cb764cb9"
+  },
+  "id": "RaG8OpoN0mZpm2rb",
+  "tags": []
+}
