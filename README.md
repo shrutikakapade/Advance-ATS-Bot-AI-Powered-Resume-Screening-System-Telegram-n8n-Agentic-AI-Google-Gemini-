@@ -12,7 +12,7 @@
     <header>
  <div>
       <div>
-        <h1>AI-Powered ATS Resume Screening Bot (Telegram + n8n + Gemini)📋</h1>
+        <h1>AI-Powered ATS Resume Screening Bot (Telegram + n8n + Gemini)📋  </h1>
         <p class="lead">AI-powered ATS resume screening system built with Telegram, n8n Agentic AI, and Google Gemini. Automatically processes PDF/ZIP resumes, extracts candidate details, generates ATS scores with LLM evaluation, and logs eligible profiles into Google Sheets for seamless HR and placement workflows.</p>
         
       
